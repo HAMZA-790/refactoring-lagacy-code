@@ -1,29 +1,37 @@
+import sys
+from pathlib import Path
+
 def compute_stats(filename):
     """
     Read numbers from a file and compute statistics.
 
     Args:
         filename: Path to the file containing numbers (one per line)
+    
+    Returns:
+        dict: Statistics dictionary with keys: total, summation, average, minimum, maximum
+              Returns None if no valid data found
     """
     try:
-        with open(filename, 'r') as file:
-            numbers = [int(line.strip()) for line in file if line.strip()]
+        numbers = [int(line.strip()) for line in Path(filename).read_text().splitlines() if line.strip()]
 
         if not numbers:
             print("No data found in file")
-            return
+            return None
 
-        total = len(numbers)
-        summation = sum(numbers)
-        average = round(summation / total)
-        minimum = min(numbers)
-        maximum = max(numbers)
+        stats = {
+            "total": len(numbers),
+            "summation": sum(numbers),
+            "average": round(sum(numbers) / len(numbers), 2),
+            "minimum": min(numbers),
+            "maximum": max(numbers),
+        }
 
-        print(f"total = {total}")
-        print(f"summation = {summation}")
-        print(f"average = {average}")
-        print(f"Minimum = {minimum}")
-        print(f"Maximum = {maximum}")
+        # Print with consistent formatting
+        for key, value in stats.items():
+            print(f"{key} = {value}")
+        
+        return stats
 
     except FileNotFoundError:
         print(f"Error: File '{filename}' not found")
@@ -31,7 +39,10 @@ def compute_stats(filename):
         print(f"Error: Invalid number format in file - {e}")
     except Exception as e:
         print(f"Error: {e}")
+    
+    return None
 
 
 if __name__ == "__main__":
-    compute_stats("random_nums.txt")
+    filename = sys.argv[1] if len(sys.argv) > 1 else "random_nums.txt"
+    compute_stats(filename)
